@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com"> 
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+<link href="https://fonts.googleapis.com/css2?family=Akshar:wght@300;400&family=Poppins:ital,wght@0,100;0,400;0,500;0,600;0,700;0,900;1,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>2 Calculator</title>
+</head>
+<body>
+    <canvas id="noise" class="noise"></canvas> 
+    <div id="app">
+        <div class="screen">
+            <div class="screen-sub"></div><br>
+            <div class="screen-sub"></div>
+         <input class="value"  type="text"value="0" type="text">
+        </div>
+        <div class="items">
+            <div class="item">
+                <button class="gray-bg btn-calc">AC</button>
+                <button class="gray-bg btn-calc">CONV</button>
+                <button class="gray-bg btn-calc">(-+)</button>
+                <button class="btn-color btn-calc">9</button>
+                <button class="btn-color btn-calc">8</button>
+                <button class="btn-color btn-calc">7</button>
+                <button class="btn-color btn-calc">6</button>
+                <button class="btn-color btn-calc">5</button>
+                <button class="btn-color btn-calc">4</button>
+                <button class="btn-color btn-calc">3</button>
+                <button class="btn-color btn-calc">2</button>
+                <button class="btn-color btn-calc">1</button>
+                <button class="btn-color btn-calc">0</button>
+                <button class="btn-color btn-calc">.</button>
+            </div>
+            <div class="math">
+                <button class="orange-bg btn-calc ">ADD</button>
+                <button class="orange-bg btn-calc ">SUB</button>
+                <button class="orange-bg btn-calc ">BIT</button>
+                <button class="orange-bg btn-calc ">-</button>
+                <button class="orange-bg btn-calc ">REL</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const btnCalcs = document.querySelectorAll('.btn-calc')
+        const input = document.querySelector('input')
+        const screenSubs = document.querySelectorAll('.screen-sub') 
+        console.log(btnCalcs)
+        for (let btnCalc of btnCalcs) {
+            btnCalc.onclick = (e) => {
+                handelClickCalc(e.target)
+            }}
+        let indexDecimal = 0;
+        let decimalNumbers = [];
+        let binaryNumbers = [];
+        let indexBinary = 0;
+        let numberUnSigned = true;
+        let isBinary = false;
+        let isDecimai = false;
+        let isCONV = false;
+        let isRel = false;
+        let isAdd = true;
+
+        // Check số nguyên có dấu với số nguyên không dấu
+            function unSignedInt() {
+                numberUnSigned = !numberUnSigned
+                    btnCalcs[2].style.color = '#fffefe';
+            }
+        
+            //Check số nhị phân 
+            function checkBinary() {
+                isBinary = !isBinary;
+                btnCalcs[1].style.color = '#fffefe';
+            }
+
+            // Check số thập phân 
+            function checkDecimai(){
+                isDecimai = !isDecimai
+                btnCalcs[1].style.color = '#fffefe';
+            }
+
+            // Render số nhị phân ra màn hình 
+
+            function handlRenderBin(){
+                if (!decimalNumbers[0]) {
+                    screenSubs[0].innerHTML = '';
+                    return;
+                }
+                screenSubs[0].innerHTML = binaryNumbers[0];
+                    if(binaryNumbers[1]){
+                        let lengthArr = binaryNumbers.length;
+                        for (let j = 1; j < lengthArr; j++){
+                            screenSubs[0].innerHTML += '+' + binaryNumbers[j];
+                        }
+                    }
+            }
+            // Render ra số thập phân
+            function handlRenderDec(){
+                if (!decimalNumbers[0]) {
+                    screenSubs[1].innerHTML = '';
+                    return;
+                }
+                    screenSubs[1].innerHTML = decimalNumbers[0];
+                    if(decimalNumbers[1]){
+                        let lengthArr = decimalNumbers.length;
+                        for (let j = 1; j < lengthArr; j++){
+                            screenSubs[1].innerHTML += '+' + decimalNumbers[j];
+                        }
+                    }
+            }
+
+            // Render ra kết quả cuối cùng hình
+            function renderResult() {
+                if (!decimalNumbers[0] || !binaryNumbers[0]) {
+                    return;
+                }
+                if (isCONV){
+                    screenSubs[0].innerHTML += '=' + handleSumBinary(binaryNumbers);
+                }
+                    screenSubs[1].innerHTML += '=' + handleSumDecimal(decimalNumbers);
+                
+                
+            }
+
+        // Xử lý ấn phím trên máy tính 
+        function handelClickCalc(calc) {
+            let value = input.value 
+            // let subValue =   parseFloat(value)
+            // console.log('SubVale', subValue)
+            // console.log('Chuỗi njận', value)
+            const clearColor14 = () => {
+                btnCalcs[14].style.color = '#fff';
+                btnCalcs[14].style.backgroundColor = '#fe9f0c'
+            }
+            const clearColor2 = () => {
+                btnCalcs[2].style.color = '#000';
+                btnCalcs[2].style.backgroundColor = '#a5a5a5'
+            }
+            const clearColor1 = () => {
+                btnCalcs[1].style.color = '#000';
+                btnCalcs[1].style.backgroundColor = '#a5a5a5'
+            }
+            switch(calc.textContent) {
+                case '=': console.log(calc);
+                break;
+                case 'AC': 
+                    clearColor14();
+                    input.value = '0';
+                    decimalNumbers.length = [];
+                    binaryNumbers.length = [];
+                    handlRenderBin() 
+                    indexBinary = 0;
+                    handlRenderDec()
+                    indexDecimal = 0;
+                break;
+                case 'CONV': 
+                            console.log(calc);
+                            isCONV = !isCONV;
+                            checkBinary()
+                            if (isBinary) {
+                                btnCalcs[1].style.color = '#fffefe'
+                                handlRenderBin()
+                            }
+                            else {
+                                clearColor1();
+                                screenSubs[0].innerHTML = '';
+                            }
+                            checkDecimai()
+                            if (checkDecimai){
+                                btnCalcs[1].style.color = '#fffefe'
+                                handlRenderDec()
+                            }
+                            else {
+                                clearColor1();
+                                screenSubs[1].innerHTML = '';
+                            }
+
+                            console.log(isBinary)
+                            if (isRel){
+                                renderResult() 
+                            }
+
+                break;
+                case '(-+)': 
+                    unSignedInt()
+                    console.log(numberUnSigned)
+                    if (numberUnSigned){
+                        clearColor2()
+
+                    } else {
+                        btnCalcs[2].style.color = '#fffefe';
+                    }
+
+                break;
+                case 'BIT': 
+                 alert('Comming soon.... 😂')
+                 break;
+                case 'ADD': 
+                        handlePlus(value);
+                        input.value = ''
+                        calc.style.backgroundColor = '#fff';
+                        calc.style.color = '#fe9f0c';
+                    
+                    break;
+                case 'REL':
+                    renderResult()
+                    isRel = !isRel;
+                    if (isRel) {
+                        return;
+                    }
+                    console.log(binaryNumbers)
+                    console.log(decimalNumbers)
+                 break;
+                case 'SUB': 
+                 alert('Comming soon.... 😂')
+                 break;
+                default: 
+                    if (value === '0' && calc.textContent !== '.'){
+                    value = '';
+                }
+                input.value =  value  + calc.textContent ;
+                console.log(calc)
+                calc.style.backgroundColor = '#888888';
+                setTimeout(function(){
+                    calc.style.backgroundColor = '#333333';
+                }, 200)
+                clearColor14();
+            }
+            }
+        // Xử lý với dấu cộng 
+        function handlePlus(subValue) {
+            // console.log()
+                decimalNumbers[indexDecimal] = subValue;
+                let input = document.querySelector('input')
+            if (subValue > 0){
+                convertDecimalToBinary(subValue)
+                console.log(decimalNumbers)
+                binaryNumbers[indexBinary] =  convertDecimalToBinary(subValue);
+                console.log(binaryNumbers)
+                if (isBinary) {
+                        handlRenderBin()
+                } 
+                        handlRenderDec()
+            }
+            else {
+                negavtiveDecimalToBinary(subValue)
+                console.log(decimalNumbers)
+                binaryNumbers[indexBinary] =  negavtiveDecimalToBinary(subValue);
+                console.log(binaryNumbers)
+                if (isBinary) {
+                        handlRenderBin()
+                } 
+                        handlRenderDec()
+            }
+                indexDecimal++
+                indexBinary++
+            
+        }
+        // // Xử lý với dấu trừ
+        // function handlePlus(subValue) {
+        //     convertDecimalToBinary(subValue)
+        //     decimalNumbers[indexDecimal] = subValue;
+        //     console.log(decimalNumbers)
+        //     binaryNumbers[indexBinary] =  convertDecimalToBinary(subValue);
+        //     console.log(binaryNumbers)
+        //     indexDecimal++
+        //     indexBinary++
+        //    let input = document.querySelector('input')
+        //    if (isBinary) {
+        //         handlRenderBin()
+        //    }
+        //         handlRenderDec()
+        // }
+
+        // Cộng nhị phân 
+        function sumBinary(numberBinary1, numberBinary2) {
+            console.log(numberBinary1)
+            let dotNumberBinary1 = Math.round((numberBinary1 - Math.floor(numberBinary1)) * 10000) / 10000;
+            console.log(dotNumberBinary1)
+            numberBinary1 = Math.floor(numberBinary1)
+            let dotNumberBinary2 = Math.round((numberBinary2 - Math.floor(numberBinary2)) * 10000) / 10000;
+            numberBinary2 = Math.floor(numberBinary2)
+            let i = 0, remainder = 0, sum = [], result = 0;
+            while (numberBinary1 !== 0 || numberBinary2 !== 0) {
+                sum[i++] = (numberBinary1 % 10 + numberBinary2 % 10  + remainder) % 2;
+                remainder = Math.floor((numberBinary1 % 10 + numberBinary2 % 10  + remainder) / 2);
+                numberBinary1 = Math.floor(numberBinary1 / 10);
+                numberBinary2 = Math.floor(numberBinary2 / 10);
+            }
+            if (remainder !== 0)
+                sum[i++] = remainder; 
+            for ( let j = 0; j < i; j++){
+                result += sum[j] * Math.pow(10, j);
+            }
+            let resultDot = sumDotBinary(dotNumberBinary1,dotNumberBinary2)
+            if ( resultDot >= 1 ){
+                resultDotAdd = Math.floor(resultDot);
+                let _i = 0, _remainder = 0, _sum = [], _result = 0;
+                while (resultDotAdd !== 0 || result !== 0) {
+                _sum[_i++] = (resultDotAdd % 10 + result % 10  + _remainder) % 2;
+                _remainder = Math.floor((resultDotAdd % 10 + result % 10  + _remainder) / 2);
+                resultDotAdd = Math.floor(resultDotAdd / 10);
+                result = Math.floor(result / 10);
+                }
+                if (_remainder !== 0)
+                    _sum[_i++] = _remainder; 
+                for ( let j = 0; j < i; j++){
+                    _result += _sum[j] * Math.pow(10, j);
+                }
+                result += _result + resultDot - Math.floor(resultDot);
+            }
+            else {
+                result += resultDot - Math.floor(resultDot);
+            }
+            result += '';
+            return result;
+        }
+
+        function sumDotBinary(dotNumberBinary1,dotNumberBinary2){
+                dotNumberBinary1 = dotNumberBinary1 * 10**6;
+                dotNumberBinary2 = dotNumberBinary2 * 10**6;
+                let i = 0, remainder = 0, sum = [], result = 0;
+                while (dotNumberBinary1 !== 0 || dotNumberBinary2 !== 0) {
+                    sum[i++] = (dotNumberBinary1 % 10 + dotNumberBinary2 % 10  + remainder) % 2;
+                    console.log(sum);
+                    remainder = Math.floor((dotNumberBinary1 % 10 + dotNumberBinary2 % 10  + remainder) / 2);
+                    dotNumberBinary1 = Math.floor(dotNumberBinary1 / 10)
+                    dotNumberBinary2 = Math.floor(dotNumberBinary2 / 10);
+                }
+                if ( remainder !== 0)
+                    sum[i++] = remainder; 
+                for ( let j = 0; j < i; j++){
+                    result += sum[j] * Math.pow(10, j);
+                }
+                result = result / 10**6
+            return result;
+        }
+        
+
+        // Xử lý cộng nhị phân  mảng
+        function handleSumBinary(binaryNumbers) {
+            // binaryNumbers = parseFloat(binaryNumbers, 10)
+            let result = binaryNumbers[0];
+            let  length = binaryNumbers.length
+            for ( let j = 1; j < length; j++){
+                result = sumBinary(result, binaryNumbers[j])
+            }
+            result = result + '';
+            return result;
+        }
+
+        // Xử lý cộng thập phân mảng
+        function handleSumDecimal(decimalNumbers) {
+            let result = 0;
+            let  length = decimalNumbers.length
+            for ( let j = 0; j < length; j++){
+                result +=  parseFloat(decimalNumbers[j]);
+            }
+            return result;
+        }
+        
+            
+       
+
+        // Thêm số cho đầy đủ bit  000000100
+        function  constraintBits(value, bit) {
+
+            value = parseFloat(value, 10);
+            bit = parseFloat(bit, 10);
+            
+            let addBit = (prop, value) => {
+                    let lengthValue = value.length;
+                    let leftBit = bit - lengthValue;
+                    for ( let i = 0; i < leftBit; i++){
+                        value = prop + value;
+                    }
+                    return value;
+                }
+            // console.log(limBit);
+            console.log(numberUnSigned)
+            if (numberUnSigned) {
+                let min = 0;
+                let max =  Math.pow(2, bit) - 1;
+                let limBit = (min <= value && value <= max);
+                value = convertDecimalToBinary(value);
+                // console.log(min, max, limBit)
+
+                if(limBit) {
+                    value = addBit('0',value);
+                }
+                else {
+                    alert('Vượt rào rồi bạn êiiiiii 😂');
+                }
+                // console.log(value);
+            }
+            else
+            {
+                let min = -((Math.pow(2, bit) / 2)  - 1);
+                let max =  Math.pow(2, bit) /2;
+                let limBit = (min <= value && value <= max);
+                console.log(min, max, limBit)
+                value = negavtiveDecimalToBinary(value);
+                if ( limBit) {
+                    value = addBit('1',value);
+                }
+                else{
+                    alert('Vượt rào rồi bạn êiiiiii 😂');
+                }
+            }
+            value += '';
+            return value;
+        }
+        
+
+        //  Chuyển số từ thập phân sang nhị phân
+        function convertDecimalToBinary(value) {
+            let subValue = Math.floor(value);
+            let binaryNumber = 0;
+            let sum = [];
+            let i = 0;
+            while (subValue !== 0) {
+                sum[i] = subValue % 2;
+                i++; 
+                subValue = Math.floor(subValue/2);
+            }
+            for ( let j = 0; j < i; j++ ) {  
+                binaryNumber += sum[j] * Math.pow(10, j) 
+            }
+            binaryNumber += '';
+            if ( value - Math.floor(value)) {
+                let valueDot = value - Math.floor(value);
+                binaryNumber = binaryNumber + '.' + convertDecDotToBinary(valueDot);
+                console.log(convertDecDotToBinary(valueDot));
+            }
+            return binaryNumber;
+        } 
+
+        // Phần thập phân của số thập phân chuyển sang số nhị phân   
+        function convertDecDotToBinary(value){
+            let sum = [];
+            let i = 0;
+                value *= 2; 
+            while (value != 1 && i <= 5 ) {
+                if ( value > 1) {
+                    value -= 1;
+                    sum[i++] = 1;
+                }
+                else {
+                    sum[i++] = 0;
+                }
+                value *= 2; 
+            }
+            sum[i++] = 1;
+            let lengthArr = sum.length;
+            let result = '';
+            for ( let i = 0; i < lengthArr; i++ ) {
+                result += sum[i];
+            }
+            return result;
+        }
+
+        // Phần thập phân của số thập phân chuyển sang số nhị phân    
+        function convertNegaDecDotToBinary(value){
+            let sum = [];
+            let i = 0;
+                value *= 2; 
+            while (value != 1 && i <= 5 ) {
+                if ( value > 1) {
+                    value -= 1;
+                    sum[i++] = 1;
+                }
+                else {
+                    sum[i++] = 0;
+                }
+                value *= 2; 
+            }
+
+            if ( i < 5) {
+                    sum[i++] = 1;
+            } else {
+                    sum[i++] = '...';
+            }
+            let lengthArr = sum.length;
+            for ( let j = 0; j < lengthArr; j++) {
+                if ( sum[j] === 0) {
+                    sum[j] = 1;
+                } else {
+                    sum[j] = 0;
+                }
+            }
+            let result = '';
+            for ( let i = 0; i < lengthArr; i++ ) {
+                result += sum[i];
+            }
+            return result;
+        }
+
+        // Chuyển số nguyên có dấu sang nhị phân
+        function negavtiveDecimalToBinary(value) {
+            value = parseFloat(value,10)
+            let absValue = Math.abs(value);
+            let newValue = convertDecimalToBinary(Math.floor(absValue));
+            let sum = [];
+            let i = 0;
+            let result = 0;
+            while ( newValue !== 0){
+                sum[i] = newValue % 10
+                if ( sum[i] === 1){
+                    sum[i] = 0;
+                }
+                else {
+                    sum[i] = 1;
+                }
+                i++;
+                newValue = Math.floor(newValue / 10);
+            }
+            for ( let j = 0; j < i; j++ ) {  
+                result += sum[j] * Math.pow(10, j) 
+            }
+            console.log(result);
+            result = result + '';
+            result = sumBinary(result,'1' );
+            if ( newValue - Math.floor(newValue)) {
+                let valueDot = value - Math.floor(value);
+                result = result + '.' + convertDecDotToBinary(valueDot);
+                console.log(convertDecDotToBinary(valueDot));
+            }
+            return result;
+
+        }
+
+
+
+
+        // Noise bg  color
+        // background noise
+            const noise = () => {
+            let canvas, ctx;
+            let wWidth, wHeight;
+            let noiseData = [];
+            let frame = 0;
+            let loopTimeout;
+
+            const createNoise = () => {
+                const idata = ctx.createImageData(wWidth, wHeight);
+                const buffer32 = new Uint32Array(idata.data.buffer);
+                const len = buffer32.length;
+                for (let i = 0; i < len; i++) {
+                if (Math.random() < 0.5) {
+                    buffer32[i] = 0xff000000;
+                }
+                }
+                noiseData.push(idata);
+            };
+
+            // Play Noise
+            const paintNoise = () => {
+                if (frame === 9) {
+                frame = 0;
+                } else {
+                frame++;
+                }
+                ctx.putImageData(noiseData[frame], 0, 0);
+            };
+
+            // Loop
+            const loop = () => {
+                paintNoise(frame);
+                loopTimeout = window.setTimeout(() => {
+                window.requestAnimationFrame(loop);
+                }, 1000 / 25);
+            };
+
+            // Setup
+            const setup = () => {
+                wWidth = window.innerWidth;
+                wHeight = window.innerHeight;
+                canvas.width = wWidth;
+                canvas.height = wHeight;
+                for (let i = 0; i < 10; i++) {
+                createNoise();
+                }
+                loop();
+            };
+
+            // Reset
+            let resizeThrottle;
+            const reset = () => {
+                window.addEventListener(
+                "resize",
+                () => {
+                    window.clearTimeout(resizeThrottle);
+                    resizeThrottle = window.setTimeout(() => {
+                    window.clearTimeout(loopTimeout);
+                    setup();
+                    }, 200);
+                },
+                false
+                );
+            };
+
+            // Init
+            const init = (() => {
+                canvas = document.getElementById("noise");
+                ctx = canvas.getContext("2d");
+                setup();
+            })();
+            };
+            noise();
+
+    </script>
+</body>
+</html>

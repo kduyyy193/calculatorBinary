@@ -65,13 +65,22 @@
         let numberUnSigned = true;
         let isBinary = false;
         let isDecimai = false;
-        let isSignNumber = false;
         let isCONV = false;
         let isResult = false;
         let isAdd = true;
         let arrBit = [4, 8, 16, 32];
         let iBit = 1;
         let overBit = false
+
+        // verify number zero 
+        function verify0() {
+            let length = decimalNumbers.length 
+            for ( let i = 0; i < length; i++ ) {
+                if (decimalNumbers[i] === '-0' || decimalNumbers[i] === '+0' ) {
+                    decimalNumbers[i] = 0;
+                }
+            }
+        }
         //Render bit trên màn hình 
         renderBit(1)
         function renderBit(i) {
@@ -144,15 +153,20 @@
 
             // Render ra kết quả cuối cùng hình
             function renderResult() {
-                if (!decimalNumbers[0] || !binaryNumbers[0]) {
-                    return;
-                }
-                if (isCONV){
-                    screenSubs[0].innerHTML += '=' + handleSumBinary(binaryNumbers);
-                } else if (isCONV && isSignNumber) {
-                    screenSubs[0].innerHTML += '=' + handleSignNumber(signBinaryNumbers);
-                }
+                if(decimalNumbers[0] && !isResult){
                     screenSubs[1].innerHTML += '=' + handleSumDecimal(decimalNumbers);
+
+                }
+                
+                if (!decimalNumbers[0]){
+                        return;
+                }
+                if (isCONV && numberUnSigned){
+                    screenSubs[0].innerHTML += '=' + handleSumBinary(binaryNumbers);
+                } else if (!numberUnSigned && isCONV)
+                {
+                    screenSubs[0].innerHTML += '=' + handleSignNumber(decimalNumbers);
+                }
                 
                 
             }
@@ -189,7 +203,7 @@
             switch(calc.textContent) {
                 case 'AC': 
                 clearColor14();
-
+                    isResult = false;   
                     reset()
                 break;
                 case 'CONV': 
@@ -225,10 +239,10 @@
                                         screenSubs[0].innerHTML = '';
                                     }
                             }
-                            
-                            if (isResult){
-                                renderResult() 
-                            }
+                               
+                                if (isResult){
+                                    renderResult() 
+                                }
 
                 break;
                 case '(-+)': 
@@ -247,6 +261,7 @@
 
                 break;
                 case '+': 
+                
                     if(numberUnSigned){
                         return;
                     } else {
@@ -261,6 +276,8 @@
                     }
                  break;
                 case 'ADD': 
+                isResult = false
+
                         handlePlus(value);
                         if (overBit) {
                             setTimeout(function(){
@@ -276,15 +293,14 @@
                         calc.style.backgroundColor = '#fff';
                         calc.style.color = '#fe9f0c';
                     
-                    break;
+                    break;s
                 case '=':
-                    renderResult()
-                    isResult = !isResult;
                     if (isResult) {
                         return;
+                    } else {
+                        renderResult()
+                        isResult = true;
                     }
-                    console.log(binaryNumbers)
-                    console.log(decimalNumbers)
                  break;
                 case 'BIT': 
                     iBit += 1;
@@ -310,7 +326,8 @@
             }
         // Xử lý với dấu cộng 
         function handlePlus(subValue) {
-                decimalNumbers[indexDecimal] = subValue;
+            decimalNumbers[indexDecimal] = subValue;
+            verify0() 
                 let input = document.querySelector('input')
                     signBinaryNumbers[indexSignNumber] =  constraintBits(subValue, arrBit[iBit])
                 if (numberUnSigned){
@@ -428,13 +445,11 @@
         // Xử công nhận phi có dấu 
         function handleSignNumber(decimalNumbers) {
             let  length = decimalNumbers.length
-            for ( let j = 0; j < length; j++) {
-                signBinaryNumbers[j] = constraintBits(decimalNumbers[j], arrBit[iBit])
-            }
-            let result = decimalNumbers[0];
+            let result = parseFloat(decimalNumbers[0]);
             for ( let j = 1; j < length; j++){
-                result +=  decimalNumbers[j]
-            }
+                result +=  parseFloat(decimalNumbers[j])
+            }   
+            console.log(result)
             result = constraintBits(result, arrBit[iBit])
             result = result + '';
             return result;

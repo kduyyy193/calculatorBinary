@@ -84,6 +84,30 @@ button {
 .screen {
   height: 170px;
   background-color: black;
+  position: relative;
+  max-height: 170px;
+  overflow-y: scroll;
+}
+
+.screen::-webkit-scrollbar {
+  width: 1px;
+}
+
+.red {
+  color: red;
+  animation: blingBling cubic-bezier(0.6, -0.28, 0.735, 0.045) 0.24s infinite;
+}
+
+@keyframes blingBling {
+  0% {
+    color: red;
+  }
+  50% {
+    color: white;
+  }
+  100% {
+    color: red;
+  }
 }
 
 input {
@@ -105,6 +129,7 @@ input {
   color: #fff;
   margin: 4px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  word-break: break-word;
 }
 
 .noise {
@@ -116,4 +141,15 @@ input {
   height: 100%;
   pointer-events: none;
   opacity: 0.05;
+}
+
+.opa5 {
+  opacity: 0.5;
+}
+
+.bit {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  color: rgba(255, 255, 255, 0.686);
 }

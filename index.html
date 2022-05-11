@@ -11,12 +11,15 @@
     <title>2 Calculator</title>
 </head>
 <body>
-    <canvas id="noise" class="noise"></canvas> 
     <div id="app">
         <div class="screen">
             <div class="screen-sub"></div><br>
             <div class="screen-sub"></div>
-         <input class="value"  type="text"value="0" type="text">
+            <div class="bit">
+                <span></span>
+                <span>BIT</span>
+            </div>
+         <input class="value" value="0" type="text">
         </div>
         <div class="items">
             <div class="item">
@@ -37,10 +40,10 @@
             </div>
             <div class="math">
                 <button class="orange-bg btn-calc ">ADD</button>
-                <button class="orange-bg btn-calc ">SUB</button>
                 <button class="orange-bg btn-calc ">BIT</button>
-                <button class="orange-bg btn-calc ">-</button>
-                <button class="orange-bg btn-calc ">RES</button>
+                <button class="orange-bg btn-calc opa5 ">+</button>
+                <button class="orange-bg btn-calc opa5 ">-</button>
+                <button class="orange-bg btn-calc ">=</button>
             </div>
         </div>
     </div>
@@ -48,7 +51,7 @@
         const btnCalcs = document.querySelectorAll('.btn-calc')
         const input = document.querySelector('input')
         const screenSubs = document.querySelectorAll('.screen-sub') 
-        console.log(btnCalcs)
+        const  bit = document.querySelector(' .bit span')
         for (let btnCalc of btnCalcs) {
             btnCalc.onclick = (e) => {
                 handelClickCalc(e.target)
@@ -56,13 +59,24 @@
         let indexDecimal = 0;
         let decimalNumbers = [];
         let binaryNumbers = [];
+        let signBinaryNumbers = [];
+        let indexSignNumber = 0;
         let indexBinary = 0;
         let numberUnSigned = true;
         let isBinary = false;
         let isDecimai = false;
+        let isSignNumber = false;
         let isCONV = false;
-        let isRel = false;
+        let isResult = false;
         let isAdd = true;
+        let arrBit = [4, 8, 16, 32];
+        let iBit = 1;
+        let overBit = false
+        //Render bit trên màn hình 
+        renderBit(1)
+        function renderBit(i) {
+            bit.innerHTML =  arrBit[i];
+        }
 
         // Check số nguyên có dấu với số nguyên không dấu
             function unSignedInt() {
@@ -112,6 +126,22 @@
                     }
             }
 
+            // Render ra số nguyên có dấu   
+            function hanldeRenderSignNumber(){
+
+                if (!decimalNumbers[0]) {
+                    screenSubs[1].innerHTML = '';
+                    return;
+                }
+                screenSubs[0].innerHTML = signBinaryNumbers[0];
+                    if(signBinaryNumbers[1]){
+                        let lengthArr = signBinaryNumbers.length;
+                        for (let j = 1; j < lengthArr; j++){
+                            screenSubs[0].innerHTML += '+' + signBinaryNumbers[j];
+                        }
+                    }
+            } 
+
             // Render ra kết quả cuối cùng hình
             function renderResult() {
                 if (!decimalNumbers[0] || !binaryNumbers[0]) {
@@ -119,18 +149,31 @@
                 }
                 if (isCONV){
                     screenSubs[0].innerHTML += '=' + handleSumBinary(binaryNumbers);
+                } else if (isCONV && isSignNumber) {
+                    screenSubs[0].innerHTML += '=' + handleSignNumber(signBinaryNumbers);
                 }
                     screenSubs[1].innerHTML += '=' + handleSumDecimal(decimalNumbers);
                 
                 
             }
 
+        // Func AC delete srcee 
+        function reset(){
+                    input.value = '0';
+                    decimalNumbers.length = [];
+                    binaryNumbers.length = [];
+                    handlRenderBin() 
+                    indexBinary = 0;
+                    handlRenderDec()
+                    indexDecimal = 0;
+                    signBinaryNumbers.length = [];
+                    hanldeRenderSignNumber()
+                    indexSignNumber = 0;
+        }
+
         // Xử lý ấn phím trên máy tính 
         function handelClickCalc(calc) {
             let value = input.value 
-            // let subValue =   parseFloat(value)
-            // console.log('SubVale', subValue)
-            // console.log('Chuỗi njận', value)
             const clearColor14 = () => {
                 btnCalcs[14].style.color = '#fff';
                 btnCalcs[14].style.backgroundColor = '#fe9f0c'
@@ -144,42 +187,46 @@
                 btnCalcs[1].style.backgroundColor = '#a5a5a5'
             }
             switch(calc.textContent) {
-                case '=': console.log(calc);
-                break;
                 case 'AC': 
-                    clearColor14();
-                    input.value = '0';
-                    decimalNumbers.length = [];
-                    binaryNumbers.length = [];
-                    handlRenderBin() 
-                    indexBinary = 0;
-                    handlRenderDec()
-                    indexDecimal = 0;
+                clearColor14();
+
+                    reset()
                 break;
                 case 'CONV': 
                             console.log(calc);
                             isCONV = !isCONV;
                             checkBinary()
-                            if (isBinary) {
-                                btnCalcs[1].style.color = '#fffefe'
-                                handlRenderBin()
+                            if (numberUnSigned){
+                                    if (isBinary) {
+                                    btnCalcs[1].style.color = '#fffefe'
+                                    handlRenderBin()
+                                    }
+                                    else {
+                                        clearColor1();
+                                        screenSubs[0].innerHTML = '';
+                                    }
+                                    checkDecimai()
+                                    if (checkDecimai){
+                                        btnCalcs[1].style.color = '#fffefe'
+                                        handlRenderDec()
+                                    }
+                                    else {
+                                        clearColor1();
+                                        screenSubs[1].innerHTML = '';
+                                    }
+                            } else 
+                            {   
+                                if (isBinary) {
+                                    btnCalcs[1].style.color = '#fffefe'
+                                    hanldeRenderSignNumber()
+                                    }
+                                    else {
+                                        clearColor1();
+                                        screenSubs[0].innerHTML = '';
+                                    }
                             }
-                            else {
-                                clearColor1();
-                                screenSubs[0].innerHTML = '';
-                            }
-                            checkDecimai()
-                            if (checkDecimai){
-                                btnCalcs[1].style.color = '#fffefe'
-                                handlRenderDec()
-                            }
-                            else {
-                                clearColor1();
-                                screenSubs[1].innerHTML = '';
-                            }
-
-                            console.log(isBinary)
-                            if (isRel){
+                            
+                            if (isResult){
                                 renderResult() 
                             }
 
@@ -189,33 +236,64 @@
                     console.log(numberUnSigned)
                     if (numberUnSigned){
                         clearColor2()
+                        btnCalcs[16].style.opacity = '0.5';
+                        btnCalcs[17].style.opacity = '0.5';
 
                     } else {
                         btnCalcs[2].style.color = '#fffefe';
+                        btnCalcs[16].style.opacity = '1';
+                        btnCalcs[17].style.opacity = '1';
                     }
 
                 break;
-                case 'BIT': 
-                 alert('Comming soon.... 😂')
+                case '+': 
+                    if(numberUnSigned){
+                        return;
+                    } else {
+                        input.value = '+';
+                    }
+                 break;
+                case '-': 
+                    if(numberUnSigned){
+                        return;
+                    } else {
+                        input.value = '-';
+                    }
                  break;
                 case 'ADD': 
                         handlePlus(value);
-                        input.value = ''
+                        if (overBit) {
+                            setTimeout(function(){
+                                screenSubs[1].innerHTML = '';
+                            }, 3000)
+                            screenSubs[1].innerHTML = '<span class="red">Bit Bit!!!! Đã vượt rào dòi  </span>';
+                            overBit = !overBit;
+                            clearColor14();
+                        }
+                        else {
+                            input.value = '0'
+                        }
                         calc.style.backgroundColor = '#fff';
                         calc.style.color = '#fe9f0c';
                     
                     break;
-                case 'RES':
+                case '=':
                     renderResult()
-                    isRel = !isRel;
-                    if (isRel) {
+                    isResult = !isResult;
+                    if (isResult) {
                         return;
                     }
                     console.log(binaryNumbers)
                     console.log(decimalNumbers)
                  break;
-                case 'SUB': 
-                 alert('Comming soon.... 😂')
+                case 'BIT': 
+                    iBit += 1;
+                    let lengthArrBit = arrBit.length
+                    if (iBit >= lengthArrBit) {
+                        iBit = 0;
+                    }
+                    console.log(arrBit[iBit]);
+                    renderBit(iBit)
                  break;
                 default: 
                     if (value === '0' && calc.textContent !== '.'){
@@ -232,51 +310,36 @@
             }
         // Xử lý với dấu cộng 
         function handlePlus(subValue) {
-            // console.log()
                 decimalNumbers[indexDecimal] = subValue;
                 let input = document.querySelector('input')
-            if (subValue > 0){
-                convertDecimalToBinary(subValue)
-                console.log(decimalNumbers)
-                binaryNumbers[indexBinary] =  convertDecimalToBinary(subValue);
-                console.log(binaryNumbers)
-                if (isBinary) {
-                        handlRenderBin()
-                } 
-                        handlRenderDec()
-            }
-            else {
-                negavtiveDecimalToBinary(subValue)
-                console.log(decimalNumbers)
-                binaryNumbers[indexBinary] =  negavtiveDecimalToBinary(subValue);
-                console.log(binaryNumbers)
-                if (isBinary) {
-                        handlRenderBin()
-                } 
-                        handlRenderDec()
-            }
-                indexDecimal++
-                indexBinary++
-            
+                    signBinaryNumbers[indexSignNumber] =  constraintBits(subValue, arrBit[iBit])
+                if (numberUnSigned){
+                    binaryNumbers[indexBinary] =  convertDecimalToBinary(subValue);
+                    convertDecimalToBinary(subValue)
+                    console.log(decimalNumbers)
+                    console.log(binaryNumbers)
+                    if (isBinary) {
+                            handlRenderBin()
+                    } 
+                            handlRenderDec()
+                }
+                else {
+                    if (isBinary && !overBit ){
+                        hanldeRenderSignNumber()
+                    }
+                    handlRenderDec()
+                }
+                    indexDecimal++;
+                    indexBinary++;
+                    indexSignNumber++;
+               
+                
         }
-        // // Xử lý với dấu trừ
-        // function handlePlus(subValue) {
-        //     convertDecimalToBinary(subValue)
-        //     decimalNumbers[indexDecimal] = subValue;
-        //     console.log(decimalNumbers)
-        //     binaryNumbers[indexBinary] =  convertDecimalToBinary(subValue);
-        //     console.log(binaryNumbers)
-        //     indexDecimal++
-        //     indexBinary++
-        //    let input = document.querySelector('input')
-        //    if (isBinary) {
-        //         handlRenderBin()
-        //    }
-        //         handlRenderDec()
-        // }
 
         // Cộng nhị phân 
         function sumBinary(numberBinary1, numberBinary2) {
+            numberBinary1 = parseFloat(numberBinary1)
+            numberBinary2 = parseFloat(numberBinary2)
             console.log(numberBinary1)
             let dotNumberBinary1 = Math.round((numberBinary1 - Math.floor(numberBinary1)) * 10000) / 10000;
             console.log(dotNumberBinary1)
@@ -361,58 +424,86 @@
             }
             return result;
         }
-        
+
+        // Xử công nhận phi có dấu 
+        function handleSignNumber(decimalNumbers) {
+            let  length = decimalNumbers.length
+            for ( let j = 0; j < length; j++) {
+                signBinaryNumbers[j] = constraintBits(decimalNumbers[j], arrBit[iBit])
+            }
+            let result = decimalNumbers[0];
+            for ( let j = 1; j < length; j++){
+                result +=  decimalNumbers[j]
+            }
+            result = constraintBits(result, arrBit[iBit])
+            result = result + '';
+            return result;
+        }        
             
        
 
-        // Thêm số cho đầy đủ bit  000000100
+        // Thêm số cho đầy đủ bit bit  cho số nguyên có d
         function  constraintBits(value, bit) {
 
             value = parseFloat(value, 10);
-            bit = parseFloat(bit, 10);
-            
+            let subResult = '';
+            console.log("value: ",value);
             let addBit = (prop, value) => {
-                    let lengthValue = value.length;
+                    value = parseFloat(value, 10)
+                    value = Math.floor(value)
+                    console.log("value: ",value);
+                    value = value + '';
+                    let lengthValue = value.length ;
                     let leftBit = bit - lengthValue;
                     for ( let i = 0; i < leftBit; i++){
                         value = prop + value;
                     }
                     return value;
                 }
-            // console.log(limBit);
-            console.log(numberUnSigned)
-            if (numberUnSigned) {
-                let min = 0;
-                let max =  Math.pow(2, bit) - 1;
-                let limBit = (min <= value && value <= max);
-                value = convertDecimalToBinary(value);
-                // console.log(min, max, limBit)
-
-                if(limBit) {
-                    value = addBit('0',value);
+            if (!numberUnSigned) {
+                if ( value > 0) {
+                    let min = 0;
+                    let max =  Math.pow(2, bit) - 1;
+                    let limBit = (min <= value && value <= max);
+                    value = convertDecimalToBinary(value);
+                    if ( value - Math.floor(value) ) {
+                        let stringValue = value.toString();
+                        let stringSubValue =  Math.floor(value).toString();
+                        subResult = stringValue.replace(stringSubValue, '') ;
+                    }
+                    if(limBit) {
+                        value = addBit('0',value) + subResult;
+                        console.log("limbit value", value, subResult)
+                    }
+                    else {
+                        overBit = true
+                        reset()
+                    }
                 }
-                else {
-                    alert('Vượt rào rồi bạn êiiiiii 😂');
-                }
-                // console.log(value);
-            }
-            else
-            {
-                let min = -((Math.pow(2, bit) / 2)  - 1);
-                let max =  Math.pow(2, bit) /2;
-                let limBit = (min <= value && value <= max);
-                console.log(min, max, limBit)
-                value = negavtiveDecimalToBinary(value);
-                if ( limBit) {
-                    value = addBit('1',value);
-                }
-                else{
-                    alert('Vượt rào rồi bạn êiiiiii 😂');
+                else
+                {
+                    let min = -((Math.pow(2, bit) / 2)  - 1);
+                    let max =  Math.pow(2, bit) /2;
+                    let limBit = (min <= value && value <= max);
+                    console.log(min, max, limBit)
+                    value = signBinary(value);
+                    if ( value - Math.floor(value) ) {
+                        let stringValue = value.toString();
+                        let stringSubValue =  Math.floor(value).toString();
+                        subResult = stringValue.replace(stringSubValue, '') ;
+                    }
+                    if ( limBit) {
+                        value = addBit('1',value) +subResult;
+                    }
+                    else {
+                        overBit = true;
+                        reset()
+                    }
                 }
             }
             value += '';
             return value;
-        }
+        }   
         
 
         //  Chuyển số từ thập phân sang nhị phân
@@ -441,90 +532,81 @@
         // Phần thập phân của số thập phân chuyển sang số nhị phân   
         function convertDecDotToBinary(value){
             let sum = [];
+            let result = '';
             let i = 0;
+            if (value * 2 === 1  ) {
+                result += 1;
+                return result;
+            }
+            while (value != 0 && i <= 5 ) {
                 value *= 2; 
-            while (value != 1 && i <= 5 ) {
-                if ( value > 1) {
+                if ( value !== 0){
+                    if ( value >= 1) {
                     value -= 1;
                     sum[i++] = 1;
+                    }
+                    else {
+                        sum[i++] = 0;
+                    }
                 }
                 else {
-                    sum[i++] = 0;
+                    return result += sum[i];
                 }
-                value *= 2; 
+                
             }
-            sum[i++] = 1;
+            if ( i > 7 ) {
+                sum[i] = '1'
+            }
             let lengthArr = sum.length;
-            let result = '';
             for ( let i = 0; i < lengthArr; i++ ) {
                 result += sum[i];
             }
             return result;
         }
 
-        // Phần thập phân của số thập phân chuyển sang số nhị phân    
-        function convertNegaDecDotToBinary(value){
-            let sum = [];
-            let i = 0;
-                value *= 2; 
-            while (value != 1 && i <= 5 ) {
-                if ( value > 1) {
-                    value -= 1;
-                    sum[i++] = 1;
-                }
-                else {
-                    sum[i++] = 0;
-                }
-                value *= 2; 
-            }
-
-            if ( i < 5) {
-                    sum[i++] = 1;
-            } else {
-                    sum[i++] = '...';
-            }
-            let lengthArr = sum.length;
-            for ( let j = 0; j < lengthArr; j++) {
-                if ( sum[j] === 0) {
-                    sum[j] = 1;
-                } else {
-                    sum[j] = 0;
-                }
-            }
-            let result = '';
-            for ( let i = 0; i < lengthArr; i++ ) {
-                result += sum[i];
-            }
-            return result;
-        }
-
-        // Chuyển số nguyên có dấu sang nhị phân
-        function negavtiveDecimalToBinary(value) {
+        // Chuyển số nguyên có dấu "-" sang nhị phân
+        function signBinary(value) {
             value = parseFloat(value,10)
             let absValue = Math.abs(value);
             let newValue = convertDecimalToBinary(Math.floor(absValue));
             let sum = [];
+            let newSum = [];
             let i = 0;
-            let result = 0;
+            let result = '';
             while ( newValue !== 0){
                 sum[i] = newValue % 10
-                if ( sum[i] === 1){
-                    sum[i] = 0;
-                }
-                else {
-                    sum[i] = 1;
-                }
                 i++;
                 newValue = Math.floor(newValue / 10);
             }
-            for ( let j = 0; j < i; j++ ) {  
-                result += sum[j] * Math.pow(10, j) 
+            let bit = i;
+            for(let j = 0; j < i; j++) {
+                if(sum[j] === 1){
+                    sum[j] = 0
+                } 
+                else if (sum[j] === 0) {
+                    sum[j] = 1;
+                }
             }
-            console.log(result);
-            result = result + '';
+            let lengthSum = sum.length;
+            for ( let j = 0; j < sum.length; j++) {
+                newSum[j] = sum[--lengthSum]
+                result += newSum[j];
+            }
             result = sumBinary(result,'1' );
-            if ( newValue - Math.floor(newValue)) {
-                let valueDot = value - Math.floor(value);
+            let lengthResult = result.length;
+            if ( lengthResult < bit) {
+                while (lengthResult < bit ) {
+                    result = '0' + result;
+                    lengthResult++;
+                }
+            }
+            if ( absValue - Math.floor(absValue)) {
+                console.log(absValue);
+                console.log(Math.floor(absValue));
+                let valueDot = absValue - Math.floor(absValue);
+                if (convertDecDotToBinary(valueDot) === undefined) {
+                    return result;
+                }
                 result = result + '.' + convertDecDotToBinary(valueDot);
                 console.log(convertDecDotToBinary(valueDot));
             }
@@ -533,83 +615,6 @@
         }
 
 
-
-
-        // Noise bg  color
-        // background noise
-            const noise = () => {
-            let canvas, ctx;
-            let wWidth, wHeight;
-            let noiseData = [];
-            let frame = 0;
-            let loopTimeout;
-
-            const createNoise = () => {
-                const idata = ctx.createImageData(wWidth, wHeight);
-                const buffer32 = new Uint32Array(idata.data.buffer);
-                const len = buffer32.length;
-                for (let i = 0; i < len; i++) {
-                if (Math.random() < 0.5) {
-                    buffer32[i] = 0xff000000;
-                }
-                }
-                noiseData.push(idata);
-            };
-
-            // Play Noise
-            const paintNoise = () => {
-                if (frame === 9) {
-                frame = 0;
-                } else {
-                frame++;
-                }
-                ctx.putImageData(noiseData[frame], 0, 0);
-            };
-
-            // Loop
-            const loop = () => {
-                paintNoise(frame);
-                loopTimeout = window.setTimeout(() => {
-                window.requestAnimationFrame(loop);
-                }, 1000 / 25);
-            };
-
-            // Setup
-            const setup = () => {
-                wWidth = window.innerWidth;
-                wHeight = window.innerHeight;
-                canvas.width = wWidth;
-                canvas.height = wHeight;
-                for (let i = 0; i < 10; i++) {
-                createNoise();
-                }
-                loop();
-            };
-
-            // Reset
-            let resizeThrottle;
-            const reset = () => {
-                window.addEventListener(
-                "resize",
-                () => {
-                    window.clearTimeout(resizeThrottle);
-                    resizeThrottle = window.setTimeout(() => {
-                    window.clearTimeout(loopTimeout);
-                    setup();
-                    }, 200);
-                },
-                false
-                );
-            };
-
-            // Init
-            const init = (() => {
-                canvas = document.getElementById("noise");
-                ctx = canvas.getContext("2d");
-                setup();
-            })();
-            };
-            noise();
 
     </script>
 </body>

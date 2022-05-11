@@ -153,3 +153,10 @@ input {
   left: 50%;
   color: rgba(255, 255, 255, 0.686);
 }
+
+@media only screen and (max-width: 420px) {
+  #app {
+    width: 90vw;
+    height: 100vh;
+  }
+}
